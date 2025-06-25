@@ -22,7 +22,7 @@ jobs:
           echo "${{ secrets.JWT_KEY }}" > server.key
           sfdx auth:jwt:grant \
             --client-id ${{ secrets.SF_CLIENT_ID }} \
-            --jwtkeyfile server.key \
+            --jwt-key-file server.key \
             --username ${{ secrets.SF_USERNAME }} \
             --instance-url ${{ secrets.SF_LOGIN_URL }} \
             --alias targetOrg
