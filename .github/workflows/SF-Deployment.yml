@@ -1,0 +1,34 @@
+name: Salesforce Metadata Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Salesforce
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🛠 Setup Salesforce CLI
+        uses: sfdx-actions/setup-sfdx@v1
+
+      - name: 🔐 Authenticate to Salesforce Org
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL }}" > authfile.txt
+          sfdx auth:sfdxurl:store --sfdxurlfile authfile.txt --setalias targetOrg --setdefaultusername
+        env:
+          SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
+
+      - name: 🧪 Validate Deployment (Check Only)
+        run: |
+          sfdx force:source:deploy -p force-app -u targetOrg --checkonly --testlevel RunLocalTests --json
+
+      - name: 🚀 Deploy to Salesforce Org
+        if: success()
+        run: |
+          sfdx force:source:deploy -p force-app -u targetOrg --testlevel RunLocalTests --json
