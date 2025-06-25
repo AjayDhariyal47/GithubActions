@@ -1,4 +1,4 @@
-name: Salesforce Metadata Deployment
+name: Salesforce Deployment with JWT Auth
 
 on:
   push:
@@ -7,28 +7,26 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to Salesforce
+    name: Deploy using JWT Auth
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: 🛠 Setup Salesforce CLI
+      - name: Setup Salesforce CLI
         uses: sfdx-actions/setup-sfdx@v1
 
-      - name: 🔐 Authenticate to Salesforce Org
+      - name: Authenticate with JWT
         run: |
-          echo "${{ secrets.SFDX_AUTH_URL }}" > authfile.txt
-          sfdx auth:sfdxurl:store --sfdx-url-file authfile.txt --alias targetOrg --set-default
-        env:
-          SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
+          echo "${{ secrets.JWT_KEY }}" > server.key
+          sfdx auth:jwt:grant \
+            --client-id ${{ secrets.SF_CLIENT_ID }} \
+            --jwtkeyfile server.key \
+            --username ${{ secrets.SF_USERNAME }} \
+            --instance-url ${{ secrets.SF_LOGIN_URL }} \
+            --set-alias targetOrg
 
-      - name: 🧪 Validate Deployment (Check Only)
-        run: |
-          sfdx force:source:deploy -p force-app -u targetOrg --checkonly --testlevel RunLocalTests --json
-
-      - name: 🚀 Deploy to Salesforce Org
-        if: success()
+      - name: Deploy to Salesforce Org
         run: |
           sfdx force:source:deploy -p force-app -u targetOrg --testlevel RunLocalTests --json
