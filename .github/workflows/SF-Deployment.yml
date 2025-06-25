@@ -20,7 +20,7 @@ jobs:
       - name: 🔐 Authenticate to Salesforce Org
         run: |
           echo "${{ secrets.SFDX_AUTH_URL }}" > authfile.txt
-          sfdx auth:sfdxurl:store --sfdxurlfile authfile.txt --setalias targetOrg --setdefaultusername
+          sfdx auth:sfdxurl:store --sfdx-url-file authfile.txt --alias targetOrg --set-default
         env:
           SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
 
